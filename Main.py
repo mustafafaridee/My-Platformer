@@ -7,13 +7,11 @@ from Config import WIDTH, HEIGHT
 pygame.init()
 
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-#BG = pygame.transform.scale(pygame.image.load('My Platformer/Black BG.jpeg'), (WIDTH, HEIGHT))
 pygame.display.set_caption("Platformer")
 
 player = Player(100, 400)
 
 def redraw():
-    #WIN.blit(BG, (0, 0))
     draw_tilemap(WIN, ldtk_data)
     player.draw(WIN)
     pygame.display.update()
