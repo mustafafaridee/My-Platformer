@@ -1,7 +1,5 @@
 import pygame
 import json5
-import pprint
-
 pygame.init()
 
 TILE_SIZE = 40
@@ -22,7 +20,7 @@ def get_tile(x, y, width=8, height=8):
 
 tiles = {
     0: pygame.transform.scale(get_tile(0, 0), (TILE_SIZE, TILE_SIZE)),  # BG
-    1: pygame.transform.scale(get_tile(1, 1), (TILE_SIZE, TILE_SIZE)),  # Solid
+    1: pygame.transform.scale(get_tile(15, 1), (TILE_SIZE, TILE_SIZE)),  # Solid
 }
 
 BG_tile_rects = []
@@ -57,7 +55,6 @@ def draw_tilemap(screen, ldtk_data):
                 dest_x = tile['px'][0] * TILE_SIZE // 8
                 dest_y = tile['px'][1] * TILE_SIZE // 8
 
-                #print(f"Autolayer tile src: ({src_x}, {src_y}), dest: ({dest_x}, {dest_y})")
                 tile_image = get_tile(src_x // 8, src_y // 8)
-                tile_image = pygame.transform.scale(tile_image, (TILE_SIZE, TILE_SIZE))  # Scale tile to TILE_SIZE
+                tile_image = pygame.transform.scale(tile_image, (TILE_SIZE, TILE_SIZE))
                 screen.blit(tile_image, (dest_x, dest_y))
