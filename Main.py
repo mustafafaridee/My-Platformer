@@ -3,21 +3,19 @@ import sys
 from Tiles import *
 from Player import Player
 from Config import WIDTH, HEIGHT
-
 pygame.init()
 
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Platformer")
 
-player = Player(100, 400)
-solid_tile_sprites = draw_tilemap(WIN, ldtk_data)
+player = Player(100, 370)
 
 def redraw():
     WIN.fill((0, 0, 0))
-    solid_tile_sprites.draw(WIN)
+    draw_tilemap(WIN, ldtk_data)
     player.draw(WIN)
+
     pygame.display.update()
-    return solid_tile_sprites
 
 clock = pygame.time.Clock()
 def main():
@@ -28,7 +26,7 @@ def main():
                 sys.exit()
                 
         keys = pygame.key.get_pressed()
-        player.update(keys, solid_tile_sprites)
+        player.update(keys, solid_tile_rects)
         redraw()
 
 if __name__ == "__main__":

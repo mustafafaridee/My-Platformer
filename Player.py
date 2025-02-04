@@ -9,7 +9,7 @@ class Player(pygame.sprite.Sprite):
         self.image = self.animations['idle_right'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        self.mask = pygame.mask.from_surface(self.image)
+        #self.mask = pygame.mask.from_surface(self.image)
         self.direction = 'right'
 
         self.speed = 8
@@ -36,7 +36,7 @@ class Player(pygame.sprite.Sprite):
             'fall_left': [pygame.image.load(f'My Platformer/Player Graphics/fall_left/{i}.png') for i in range(1)]
         }
 
-    def update(self, keys, tile_sprites):
+    def update(self, keys, tile_rects):
         dx = 0
         dy = self.y_vel
 
@@ -57,7 +57,7 @@ class Player(pygame.sprite.Sprite):
                 else:
                     self.current_animation = 'idle_right'
 
-        if keys[pygame.K_SPACE] and self.on_ground:
+        if (keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]) and self.on_ground:
             self.y_vel = self.jump_force
             self.on_ground = False
             if self.direction == 'left':
@@ -70,13 +70,16 @@ class Player(pygame.sprite.Sprite):
             self.y_vel = self.max_gravity
 
         self.rect.x += dx
+        self.check_collisions(tile_rects, dx, 0)
         self.rect.y += dy
+        self.check_collisions(tile_rects, 0, dy)
 
         if self.rect.y > HEIGHT:
-            self.rect.y = 400
+            self.rect.y = 370
             self.y_vel = 0
-
-        self.check_collisions(tile_sprites, dx, dy)
+            self.dy = 0
+            self.rect.x = 100
+            self.dx = 0
 
         if not self.on_ground:
             if self.y_vel > 0:
@@ -87,36 +90,30 @@ class Player(pygame.sprite.Sprite):
 
         self.update_animation()
 
-        self.mask = pygame.mask.from_surface(self.image)
-
-    def check_collisions(self, tile_sprites, dx, dy):
-        self.on_ground = False
-        overlap = None  # Initialize overlap to None
-        for tile in tile_sprites:
-            if self.rect.colliderect(tile.rect):
-                offset_x = tile.rect.x - self.rect.x
-                offset_y = tile.rect.y - self.rect.y
-                overlap = self.mask.overlap_area(tile.mask, (offset_x, offset_y))
-                if overlap:
-                    if dx > 0:  # Moving right
-                        self.rect.right = tile.rect.left
-                    elif dx < 0:  # Moving left
-                        self.rect.left = tile.rect.right
-                    if dy > 0:  # Moving down
-                        self.rect.bottom = tile.rect.top
-                        self.y_vel = 0
-                        self.on_ground = True
-                    elif dy < 0:  # Moving up
-                        self.rect.top = tile.rect.bottom
-                        self.y_vel = 0
+    def check_collisions(self, tile_rects, dx, dy):
+        for tile in tile_rects:
+            if self.rect.colliderect(tile):
+                if dx > 0:  # Moving right
+                    self.rect.right = tile.left
+                elif dx < 0:  # Moving left
+                    self.rect.left = tile.right
+                if dy > 0:  # Falling down
+                    self.rect.bottom = tile.top
+                    self.y_vel = 0
+                    self.on_ground = True
+                elif dy < 0:  # Jumping up
+                    self.rect.top = tile.bottom
+                    self.y_vel = 0
 
     def update_animation(self):
         self.animation_timer += self.animation_speed
         if self.animation_timer >= 1:
             self.animation_timer = 0
             self.current_frame = (self.current_frame + 1) % len(self.animations[self.current_animation])
-            self.image = self.animations[self.current_animation][self.current_frame]
-            self.mask = pygame.mask.from_surface(self.image)
+            new_image = self.animations[self.current_animation][self.current_frame]
+            new_rect = new_image.get_rect(midbottom=self.rect.midbottom)
+            self.image = new_image
+            self.rect = new_rect
 
     def draw(self, screen):
         screen.blit(self.image, self.rect.topleft)

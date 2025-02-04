@@ -21,13 +21,6 @@ tiles = {
     1: pygame.transform.scale(get_tile(15, 1), (TILE_SIZE, TILE_SIZE)),  # Solid
 }
 
-class Tile(pygame.sprite.Sprite):
-    def __init__(self, image, x, y):
-        super().__init__()
-        self.image = image
-        self.rect = self.image.get_rect(topleft=(x, y))
-        self.mask = pygame.mask.from_surface(self.image)
-
 BG_tile_rects = []
 solid_tile_rects = []
 
