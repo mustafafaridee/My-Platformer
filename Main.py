@@ -10,14 +10,16 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Platformer")
 
 player = Player(100, 400)
+solid_tile_sprites = draw_tilemap(WIN, ldtk_data)
 
 def redraw():
-    draw_tilemap(WIN, ldtk_data)
+    WIN.fill((0, 0, 0))
+    solid_tile_sprites.draw(WIN)
     player.draw(WIN)
     pygame.display.update()
+    return solid_tile_sprites
 
 clock = pygame.time.Clock()
-
 def main():
     while True:
         clock.tick(60)
@@ -26,7 +28,7 @@ def main():
                 sys.exit()
                 
         keys = pygame.key.get_pressed()
-        player.update(keys, solid_tile_rects)
+        player.update(keys, solid_tile_sprites)
         redraw()
 
 if __name__ == "__main__":
