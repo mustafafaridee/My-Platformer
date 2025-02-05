@@ -13,7 +13,7 @@ class Player(pygame.sprite.Sprite):
         self.direction = 'right'
 
         self.speed = 8
-        self.jump_force = -12.5
+        self.jump_force = -14
         self.y_vel = 0
         self.gravity = 0.5
         self.max_gravity = 15
@@ -23,6 +23,9 @@ class Player(pygame.sprite.Sprite):
         self.current_frame = 0
         self.animation_speed = 0.1
         self.animation_timer = 0
+
+        self.world_shift_x = 0
+        self.world_shift_y = 0
 
     def load_images(self):
         self.animations = { 
@@ -74,12 +77,15 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += dy
         self.check_collisions(tile_rects, 0, dy)
 
+        # Respawn
         if self.rect.y > HEIGHT:
             self.rect.y = 370
             self.y_vel = 0
             self.dy = 0
             self.rect.x = 100
             self.dx = 0
+            self.world_shift_x = 0
+            self.world_shift_y = 0
 
         if not self.on_ground:
             if self.y_vel > 0:
@@ -89,6 +95,16 @@ class Player(pygame.sprite.Sprite):
                     self.current_animation = 'fall_right'
 
         self.update_animation()
+
+        # X world shift
+        if self.rect.right > WIDTH - 400:  # Moving Right
+            self.world_shift_x -= self.speed
+            self.rect.right = WIDTH - 400
+
+        elif self.rect.left < 400:  # Moving Left
+            if self.world_shift_x < 0:
+                self.world_shift_x += self.speed
+                self.rect.left = 400
 
     def check_collisions(self, tile_rects, dx, dy):
         for tile in tile_rects:

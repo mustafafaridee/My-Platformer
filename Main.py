@@ -12,7 +12,7 @@ player = Player(100, 370)
 
 def redraw():
     WIN.fill((0, 0, 0))
-    draw_tilemap(WIN, ldtk_data)
+    draw_tilemap(WIN, ldtk_data, player.world_shift_x, player.world_shift_y)
     player.draw(WIN)
 
     pygame.display.update()
