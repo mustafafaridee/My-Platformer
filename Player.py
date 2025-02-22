@@ -9,7 +9,6 @@ class Player(pygame.sprite.Sprite):
         self.image = self.animations['idle_right'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        #self.mask = pygame.mask.from_surface(self.image)
         self.direction = 'right'
 
         self.speed = 8
@@ -76,6 +75,9 @@ class Player(pygame.sprite.Sprite):
         self.check_collisions(tile_rects, dx, 0)
         self.rect.y += dy
         self.check_collisions(tile_rects, 0, dy)
+
+        if dy > 0.5:
+            self.on_ground = False
 
         # Respawn
         if self.rect.y > HEIGHT:
