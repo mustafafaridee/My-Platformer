@@ -79,16 +79,6 @@ class Player(pygame.sprite.Sprite):
         if dy > 0.5:
             self.on_ground = False
 
-        # Respawn
-        if self.rect.y > HEIGHT:
-            self.rect.y = 370
-            self.y_vel = 0
-            self.dy = 0
-            self.rect.x = 100
-            self.dx = 0
-            self.world_shift_x = 0
-            self.world_shift_y = 0
-
         if not self.on_ground:
             if self.y_vel > 0:
                 if self.direction == 'left':
@@ -108,13 +98,27 @@ class Player(pygame.sprite.Sprite):
                 self.world_shift_x += self.speed
                 self.rect.left = 400
 
+        self.respawn()
+
+    def respawn(self):
+        if self.rect.y > HEIGHT + 100:
+            self.rect.y = 370
+            self.y_vel = 0
+            self.dy = 0
+            self.rect.x = 100
+            self.dx = 0
+            self.world_shift_x = 0
+            self.world_shift_y = 0
+
     def check_collisions(self, tile_rects, dx, dy):
         for tile in tile_rects:
             if self.rect.colliderect(tile):
                 if dx > 0:  # Moving right
                     self.rect.right = tile.left
+                    self.rect.x -= 2
                 elif dx < 0:  # Moving left
                     self.rect.left = tile.right
+                    self.rect.x += 2
                 if dy > 0:  # Falling down
                     self.rect.bottom = tile.top
                     self.y_vel = 0
