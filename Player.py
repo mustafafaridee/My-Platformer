@@ -47,17 +47,20 @@ class Player(pygame.sprite.Sprite):
             self.direction = 'left'
             if self.on_ground:
                 self.current_animation = 'run_left'
+                self.animation_speed = 0.15
         elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and self.rect.x < (WIDTH - 25 - self.image.get_width()):
             dx = self.speed
             self.direction = 'right'
             if self.on_ground:
                 self.current_animation = 'run_right'
+                self.animation_speed = 0.15
         else:
             if self.on_ground:
                 if self.direction == 'left':
                     self.current_animation = 'idle_left'
                 else:
                     self.current_animation = 'idle_right'
+                self.animation_speed = 0.1
 
         if (keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]) and self.on_ground:
             self.y_vel = self.jump_force
@@ -66,6 +69,7 @@ class Player(pygame.sprite.Sprite):
                 self.current_animation = 'jump_left'
             else:
                 self.current_animation = 'jump_right'
+            self.animation_speed = 0.1
 
         self.y_vel += self.gravity
         if self.y_vel > self.max_gravity:
@@ -85,6 +89,7 @@ class Player(pygame.sprite.Sprite):
                     self.current_animation = 'fall_left'
                 else:
                     self.current_animation = 'fall_right'
+                self.animation_speed = 0.1
 
         self.update_animation()
 
