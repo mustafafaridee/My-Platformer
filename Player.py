@@ -26,17 +26,31 @@ class Player(pygame.sprite.Sprite):
         self.world_shift_x = 0
         self.world_shift_y = 0
 
+        self.dust_particles = {
+            'jump': [self.scale_image(pygame.image.load(f'My Platformer/Dust Particles/Jump/{i}.png')) for i in range(6)],
+            'fall': [self.scale_image(pygame.image.load(f'My Platformer/Dust Particles/Fall/{i}.png')) for i in range(5)],
+            'run': [self.scale_image(pygame.image.load(f'My Platformer/Dust Particles/Run/{i}.png')) for i in range(5)]
+        }
+        self.dust_frame = 0
+        self.dust_animation_speed = 0.1
+        self.dust_timer = 0
+        self.current_dust_animation = None
+
     def load_images(self):
         self.animations = { 
             'idle_right': [pygame.image.load(f'My Platformer/Player Graphics/idle_right/{i}.png') for i in range(5)],
             'idle_left': [pygame.image.load(f'My Platformer/Player Graphics/idle_left/{i}.png') for i in range(5)],
             'run_right': [pygame.image.load(f'My Platformer/Player Graphics/run_right/{i}.png') for i in range(6)],
-            'run_left': [pygame.image.load(f'My Platformer/Player Graphics/run_left/{i}.png') for i in range(6)],
+            'run_left': [pygame.transform.flip(pygame.image.load(f'My Platformer/Player Graphics/run_right/{i}.png'), True, False) for i in range(6)],
             'jump_right': [pygame.image.load(f'My Platformer/Player Graphics/jump_right/{i}.png') for i in range(1)],
             'jump_left': [pygame.image.load(f'My Platformer/Player Graphics/jump_left/{i}.png') for i in range(1)],
             'fall_right': [pygame.image.load(f'My Platformer/Player Graphics/fall_right/{i}.png') for i in range(1)],
             'fall_left': [pygame.image.load(f'My Platformer/Player Graphics/fall_left/{i}.png') for i in range(1)]
         }
+
+    def scale_image(self, image):
+        width, height = image.get_size()
+        return pygame.transform.scale(image, (int(width * 2), int(height * 2)))
 
     def update(self, keys, tile_rects):
         dx = 0
@@ -48,12 +62,14 @@ class Player(pygame.sprite.Sprite):
             if self.on_ground:
                 self.current_animation = 'run_left'
                 self.animation_speed = 0.15
+                self.current_dust_animation = 'run'
         elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and self.rect.x < (WIDTH - 25 - self.image.get_width()):
             dx = self.speed
             self.direction = 'right'
             if self.on_ground:
                 self.current_animation = 'run_right'
                 self.animation_speed = 0.15
+                self.current_dust_animation = 'run'
         else:
             if self.on_ground:
                 if self.direction == 'left':
@@ -61,6 +77,9 @@ class Player(pygame.sprite.Sprite):
                 else:
                     self.current_animation = 'idle_right'
                 self.animation_speed = 0.1
+                if self.current_dust_animation:
+                    self.reset_dust_particles()
+                    self.current_dust_animation = None
 
         if (keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]) and self.on_ground:
             self.y_vel = self.jump_force
@@ -70,6 +89,8 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.current_animation = 'jump_right'
             self.animation_speed = 0.1
+            self.reset_dust_particles()
+            self.current_dust_animation = 'jump'
 
         self.y_vel += self.gravity
         if self.y_vel > self.max_gravity:
@@ -82,6 +103,9 @@ class Player(pygame.sprite.Sprite):
 
         if dy > 0.5:
             self.on_ground = False
+            if self.current_dust_animation != 'fall':
+                self.reset_dust_particles()
+                self.current_dust_animation = 'fall'
 
         if not self.on_ground:
             if self.y_vel > 0:
@@ -92,6 +116,7 @@ class Player(pygame.sprite.Sprite):
                 self.animation_speed = 0.1
 
         self.update_animation()
+        self.update_dust_particles()
 
         # X world shift
         if self.rect.right > WIDTH - 400:  # Moving Right
@@ -107,7 +132,7 @@ class Player(pygame.sprite.Sprite):
 
     def respawn(self):
         if self.rect.y > HEIGHT + 100:
-            self.rect.y = 370
+            self.rect.y = 420
             self.y_vel = 0
             self.dy = 0
             self.rect.x = 100
@@ -128,9 +153,11 @@ class Player(pygame.sprite.Sprite):
                     self.rect.bottom = tile.top
                     self.y_vel = 0
                     self.on_ground = True
+                    #self.reset_dust_particles()
                 elif dy < 0:  # Jumping up
                     self.rect.top = tile.bottom
                     self.y_vel = 0
+                    self.rect.y += 2
 
     def update_animation(self):
         self.animation_timer += self.animation_speed
@@ -142,5 +169,22 @@ class Player(pygame.sprite.Sprite):
             self.image = new_image
             self.rect = new_rect
 
+    def update_dust_particles(self):
+        if self.current_dust_animation:
+            self.dust_timer += self.dust_animation_speed
+            if self.dust_timer >= 1:
+                self.dust_timer = 0
+                self.dust_frame = (self.dust_frame + 1) % len(self.dust_particles[self.current_dust_animation])
+
+    def reset_dust_particles(self):
+        self.dust_frame = 0
+        self.dust_timer = 0
+
     def draw(self, screen):
+        if self.current_dust_animation:
+            dust_image = self.dust_particles[self.current_dust_animation][self.dust_frame]
+            if self.direction == 'left' and self.current_dust_animation == 'run':
+                dust_image = pygame.transform.flip(dust_image, True, False)
+            dust_rect = dust_image.get_rect(midbottom=self.rect.midbottom)
+            screen.blit(dust_image, dust_rect.topleft)
         screen.blit(self.image, self.rect.topleft)

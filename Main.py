@@ -8,7 +8,7 @@ pygame.init()
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Platformer")
 
-player = Player(100, 370)
+player = Player(100, 420)
 
 def redraw():
     WIN.fill((0, 0, 0))
